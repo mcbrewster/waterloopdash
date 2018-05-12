@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  display: flex;
 }
 
 .App-logo {
@@ -29,5 +30,17 @@
 
 .graph{
 width: 350px; 
-height: 350px;
+height:350px;
+}
+
+.buttons button{
+   display:block; 
+   margin-bottom: 30px; 
+   width: 100px;
+   height:50px; 
+}
+
+.buttons{
+  margin-top: 75px; 
+   
 }

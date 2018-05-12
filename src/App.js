@@ -3,76 +3,90 @@ import logo from './logo.svg';
 import './App.css';
 import * as V from 'victory';
 import { VictoryLine, VictoryTheme, VictoryChart,VictoryStack,VictoryAxis  } from 'victory';
-import Websocket from 'react-websocket';
+//import Websocket from 'react-websocket';
+exclude: /node_modules/; 
  
 
 class App extends Component {
 constructor(dataA,dataD,dataV){
   super(); 
-   this.dataV= [{x:0, y:0}];
-  this.dataD= [{x:0, y:0}]; 
-  this.dataA=[{x:0, y:0}]; 
-  this.websocket =new Websocket({url:"wss://wloop.localtunnel.me",protocol: "wss"}); 
-  this.braking_temp; 
-  this.prop_temp; 
-  this.CurrentState; 
+   this.state = {
+     dataV: [{x:0, y:0}],
+    dataD:[{x:0, y:0}],
+    dataA:[{x:0, y:0}],
+    braking_temp:0 , 
+    prop_temp: 0,
+    CurrentState: 0, 
+    Motherboard_temp: 0};
+
+  this.websocket =new WebSocket("wss://wloop2.localtunnel.me");
+  this.websocket.onopen = function(){console.log("connected");};
+  this.websocket.onmessage = this.handleData.bind(this);
+  this.Brake= this.Brake.bind(this); 
 }
 
   handleData(data) {
-    let result = JSON.parse(data);
-    this.dataV.push({x: result.velocity, y:result.time}); 
-   this.dataD.push({x: result.distance, y:result.time}); 
-    this.dataA.push({x: result.Acceleration, y:result.time}); 
-    this.braking_temp=result.Braking_temp; 
-    this.prop_temp=result.Propulsion_temp;
-    this.CurrentState=result.Pod_state;
+    console.log("working ", data.data);
+    var result = JSON.parse(data.data);
+    console.log(result.time_since_start, result.velocity);
+    this.state.dataV.push({x: result.time_since_start, y: result.velocity}); 
+    this.state.dataD.push({x: result.time_since_start, y:result.distance}); 
+    this.state.dataA.push({x: result.time_since_start, y:result.acceleration}); 
+    this.setState({
+      dataV: this.state.dataV,
+      dataD: this.state.dataD,
+      dataA: this.state.dataA,
+      braking_temp: result.braking_temp,
+      CurrentState: result.pod_state,
+      Motherboard_temp: result.motherboard_temp,
+      prop_temp: result.propulsion_temp,
+    });
+    console.log(this.prop_temp); 
+  
   }
   Brake(){
-    var podState = { "Pod State": "Brake"};
-    this.websocket.send(JSON.stringify(podState));
-    console.log(podState["Pod State"]);
+    console.log(this.websocket.state.ws);
+    this.websocket.state.ws.send('{Pod_state : "BRAKE"}');
   }
   Ready(){
-    var podState = { "Pod State": "READY"};
-    this.websocket.send(JSON.stringify(podState));
-    console.log(podState["Pod State"]);
+    const socket = new WebSocket('wss://wloop2.localtunnel.me');
+    this.websocket.state.ws.send('{Pod_state : "READY"}');
   }
   Accelerate(){
-    var podState = { "Pod State": "ACEEL"};
-    this.websocket.send(JSON.stringify(podState));
-    console.log(podState["Pod State"]);
+    const socket = new WebSocket('wss://wloop2.localtunnel.me');
+    this.websocket.state.ws.send('{Pod_state : "ACCELERATE"}');
+
   }
+  
 
   render() {
+    console.log("working");
     return (
       <div className="App">
-          <Websocket url='wss://wloop.localtunnel.me'
-              onMessage={this.handleData.bind(this)}/>
       <div className='graph'>
       <VictoryChart
       theme={VictoryTheme.material}
       >
-    <VictoryStack
-     colorScale={["tomato", "orange", "gold"]}
-    >
+      <VictoryStack>
+  
       <VictoryLine
         style={{
           data: { stroke: "#f1f442", width: "50%", height: "50%" },
           parent: { border: "1px solid #ccc"}
         }}
-        data={this.dataA}
+        data={this.state.dataA}
       /><VictoryLine
       style={{
         data: { stroke: "#63625d", width: "50%", height: "50%" },
         parent: { border: "1px solid #ccc"}
       }}
-      data={this.dataV}
+      data={this.state.dataV}
     /><VictoryLine
     style={{
       data: { stroke: "#050505", width: "50%", height: "50%" },
       parent: { border: "1px solid #ccc"}
     }}
-    data={this.dataD} 
+    data={this.state.dataD} 
   /></VictoryStack>
     </VictoryChart>
     </div>
@@ -89,13 +103,16 @@ constructor(dataA,dataD,dataV){
   </div>
   <div className="display">
     <label>
-      <p>Braking Temperature: {this.braking_temp}</p>
+      <p>Braking Temperature: {this.state.braking_temp}</p>
     </label>
     <label>
-      <p>Propulsion Temperature: {this.prop_temp}</p>
+      <p>Propulsion Temperature: {this.state.prop_temp}</p>
     </label>
     <label>
-      <p>State: {this.CurrentState}</p>
+      <p>Mother Board Temperature: {this.state.Motherboard_temp}</p>
+    </label>
+    <label>
+      <p>State: {this.state.CurrentState}</p>
     </label>
   </div>
   </div>

@@ -11,10 +11,10 @@ class App extends Component {
       <div className='graph'>
       <VictoryChart
       theme={VictoryTheme.material}
-    >
+      >
     <VictoryStack
-  colorScale={["tomato", "orange", "gold"]}
->
+     colorScale={["tomato", "orange", "gold"]}
+    >
       <VictoryLine
         style={{
           data: { stroke: "#c43a31", width: "50%", height: "50%" },
@@ -54,6 +54,20 @@ class App extends Component {
   /></VictoryStack>
     </VictoryChart>
     </div>
+    <div className="buttons">
+    <button onclick="Brake()">
+      Brake  
+    </button>
+    <button onclick="Ready()">
+      Ready
+    </button>
+    <button onclick="Aceel()">
+      Accelerate
+    </button>
+  </div>
+  <div className="temp + state">
+  //write here
+  </div>
   </div>
     );
   }

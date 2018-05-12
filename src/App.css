@@ -42,5 +42,8 @@ height:350px;
 
 .buttons{
   margin-top: 75px; 
-   
+}
+.display{
+  padding-top: 75px;
+  padding-left: 10px; 
 }
